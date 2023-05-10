@@ -29,4 +29,4 @@ This is a Java command-line application that takes user input and sorts it in a 
 ## Author
 This application was developed by Adrian Perez Cabrera.
 
-We hope you find this application useful!
+I hope you find this application useful!
