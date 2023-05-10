@@ -24,10 +24,9 @@ public class SmartStringCollator implements Comparator<String> {
     }
 
     private List<String> getGroups(String line) {
-        //System.out.println("str = " + str);
         List<String> groups = new ArrayList<>();
         StringBuilder standardGroup = new StringBuilder();
-        StringBuilder spaceGroup = new StringBuilder(); // added StringBuilder for space characters
+        StringBuilder spaceGroup = new StringBuilder();
         for (int i = 0; i < line.length(); i++) {
             char character = line.charAt(i);
             if (Character.isLetter(character)) {
@@ -38,7 +37,7 @@ public class SmartStringCollator implements Comparator<String> {
                 standardGroup.append(character);
             } else if (Character.isSpaceChar(character)) {
                 handleNewGroup(groups, standardGroup);
-                spaceGroup.append(character); // add space character to space group
+                spaceGroup.append(character);
             } else {
                 handleNewGroup(groups, standardGroup);
                 groups.add(Character.toString(character));
@@ -84,23 +83,22 @@ public class SmartStringCollator implements Comparator<String> {
             int typeB = getGroupType(groupB);
             if (typeA != typeB) {
                 if (typeA == SPACE_KEY) {
-                    return A; // spaces come first
+                    return A;
                 } else if ( typeB == SPACE_KEY) {
-                    return B; // spaces come first
+                    return B;
                 } else if (typeA == SEPARATOR_KEY && (typeB == LETTER_KEY || typeB == DIGIT_KEY)) {
-                    return A; // separators come next
+                    return A;
                 } else if ((typeA == LETTER_KEY || typeA == DIGIT_KEY) && typeB == SEPARATOR_KEY) {
-                    return B; // separators come next
+                    return B;
                 } else if (typeA == DIGIT_KEY && typeB == LETTER_KEY) {
-                    return A; // digits come before letters
+                    return A;
                 } else if (typeA == LETTER_KEY && typeB == DIGIT_KEY) {
-                    return B; // letters come after digits
+                    return B;
                 }
             } else {
                 if (typeA == SPACE_KEY) {
-                    return EQUAL; // both groups are spaces, consider them equal
+                    return EQUAL;
                 } else if (typeA == DIGIT_KEY) {
-                    // compare groups of digits by numeric value
                     BigInteger valueA = new BigInteger(groupA);
                     BigInteger valueB = new BigInteger(groupB);
                     int numericValueComparison = valueA.compareTo(valueB);
@@ -108,7 +106,6 @@ public class SmartStringCollator implements Comparator<String> {
                         return numericValueComparison;
                     }
                 } else {
-                    // compare groups of same type using standard collatorB
                     CollationKey keyA = collator.getCollationKey(groupA);
                     CollationKey keyB = collator.getCollationKey(groupB);
                     int standardCollatorResult = keyA.compareTo(keyB);
@@ -119,7 +116,6 @@ public class SmartStringCollator implements Comparator<String> {
             }
             i++;
         }
-        // compare remaining groups by length
         return groupsA.size() - groupsB.size();
     }
 }
