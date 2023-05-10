@@ -11,9 +11,9 @@ public class SmartStringCollator implements Comparator<String> {
     private final int SEPARATOR_KEY = 1;
     private final int DIGIT_KEY = 2;
     private final int LETTER_KEY = 3;
-    private final String SPACE = ".*\\s+.*";
-    private final String DIGIT = "\\d+";
-    private final String LETTER = "\\w+|[a-zA-Z]";
+    private final String SPACE_GROUP = ".*\\s+.*";
+    private final String DIGIT_GROUP = "\\d+";
+    private final String LETTER_GROUP = "\\w+|[a-zA-Z]";
     private final int A = -1;
     private final int B = 1;
     private final int EQUAL = 0;
@@ -24,9 +24,10 @@ public class SmartStringCollator implements Comparator<String> {
     }
 
     private List<String> getGroups(String line) {
+        //System.out.println("str = " + str);
         List<String> groups = new ArrayList<>();
         StringBuilder standardGroup = new StringBuilder();
-        StringBuilder spaceGroup = new StringBuilder();
+        StringBuilder spaceGroup = new StringBuilder(); // added StringBuilder for space characters
         for (int i = 0; i < line.length(); i++) {
             char character = line.charAt(i);
             if (Character.isLetter(character)) {
@@ -37,7 +38,7 @@ public class SmartStringCollator implements Comparator<String> {
                 standardGroup.append(character);
             } else if (Character.isSpaceChar(character)) {
                 handleNewGroup(groups, standardGroup);
-                spaceGroup.append(character);
+                spaceGroup.append(character); // add space character to space group
             } else {
                 handleNewGroup(groups, standardGroup);
                 groups.add(Character.toString(character));
@@ -60,11 +61,11 @@ public class SmartStringCollator implements Comparator<String> {
     }
 
     private int getGroupType(String group) {
-        if (group.matches(SPACE)) {
+        if (group.matches(SPACE_GROUP)) {
             return SPACE_KEY;
-        } else if (group.matches(DIGIT)) {
+        } else if (group.matches(DIGIT_GROUP)) {
             return DIGIT_KEY;
-        } else if (group.matches(LETTER)) {
+        } else if (group.matches(LETTER_GROUP)) {
             return LETTER_KEY;
         } else {
             return SEPARATOR_KEY;
@@ -83,39 +84,36 @@ public class SmartStringCollator implements Comparator<String> {
             int typeB = getGroupType(groupB);
             if (typeA != typeB) {
                 if (typeA == SPACE_KEY) {
-                    return -1; // spaces come first
+                    return A; // spaces come first
                 } else if ( typeB == SPACE_KEY) {
-                    return 1; // spaces come first
+                    return B; // spaces come first
                 } else if (typeA == SEPARATOR_KEY && (typeB == LETTER_KEY || typeB == DIGIT_KEY)) {
-                    return -1; // separators come next
+                    return A; // separators come next
                 } else if ((typeA == LETTER_KEY || typeA == DIGIT_KEY) && typeB == SEPARATOR_KEY) {
-                    return 1; // separators come next
+                    return B; // separators come next
                 } else if (typeA == DIGIT_KEY && typeB == LETTER_KEY) {
-                    return -1; // digits come before letters
+                    return A; // digits come before letters
                 } else if (typeA == LETTER_KEY && typeB == DIGIT_KEY) {
-                    return 1; // letters come after digits
+                    return B; // letters come after digits
                 }
             } else {
-                if (typeA == SEPARATOR_KEY) {
-                    return 0; // both groups are spaces, consider them equal
+                if (typeA == SPACE_KEY) {
+                    return EQUAL; // both groups are spaces, consider them equal
                 } else if (typeA == DIGIT_KEY) {
                     // compare groups of digits by numeric value
                     BigInteger valueA = new BigInteger(groupA);
-                    System.out.println("valueA = " + valueA);
                     BigInteger valueB = new BigInteger(groupB);
-                    System.out.println("valueB = " + valueB);
-                    int comparisonResult = valueA.compareTo(valueB);
-                    System.out.println("comparisonResult = " + comparisonResult);
-                    if (comparisonResult != 0) {
-                        return comparisonResult;
+                    int numericValueComparison = valueA.compareTo(valueB);
+                    if (numericValueComparison != 0) {
+                        return numericValueComparison;
                     }
                 } else {
                     // compare groups of same type using standard collatorB
                     CollationKey keyA = collator.getCollationKey(groupA);
                     CollationKey keyB = collator.getCollationKey(groupB);
-                    int comparisonResult = keyA.compareTo(keyB);
-                    if (comparisonResult != 0) {
-                        return comparisonResult;
+                    int standardCollatorResult = keyA.compareTo(keyB);
+                    if (standardCollatorResult != 0) {
+                        return standardCollatorResult;
                     }
                 }
             }

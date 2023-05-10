@@ -10,7 +10,7 @@ public class UserInterface {
     public void writeInstructions(){
         System.out.println("""
                     
-                    Welcome to Adrian's "Smart Sort Application"
+                    Welcome to Adrian's "Smart Sort Application".
                 
                                     /\\_____/\\
                                    /  o   o  \\
